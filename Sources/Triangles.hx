@@ -80,6 +80,13 @@ class Span {
 }
 
 class Triangles {
+	public static var depthBuffer: Array<Float> = [];
+	
+	static function shadePixel(g: Graphics, x: Int, y: Int, z: Float, u: Float, v: Float) {
+		var image = Assets.images.tiger_atlas;
+		g.setPixel(x, y, image.at(Math.round(u * image.width), Math.round(v * image.height)));
+	}
+
 	static function drawSpan(g: Graphics, span: Span, y: Int) {
 		var xdiff = span.x2 - span.x1;
 		if (xdiff == 0) return;
@@ -100,7 +107,10 @@ class Triangles {
 			var z = span.z1 + zdiff * factor;
 			var u = span.u1 + udiff * factor;
 			var v = span.v1 + vdiff * factor;
-			g.setPixel(x, y, Color.Red);
+			if (depthBuffer[y * System.windowWidth() + x] > z) {
+				shadePixel(g, x, y, z, u, 1 - v);
+				depthBuffer[y * System.windowWidth() + x] = z;
+			}
 			factor += factorStep;
 		}
 	}
